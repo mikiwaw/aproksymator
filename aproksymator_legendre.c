@@ -1,4 +1,4 @@
-
+//test
 
 double legendre(int degree, double x) {
 	switch (degree) {
