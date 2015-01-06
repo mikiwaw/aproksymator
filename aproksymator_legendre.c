@@ -1,5 +1,6 @@
 #include "makespl.h"
 #include "math.h"
+#include "piv_ge_solver.h"
 
 double legendre(int degree, double x) {
 	double tmp = (double)degree;
@@ -18,7 +19,7 @@ double legendre(int degree, double x) {
 		return (63 * pow(x, 5) - 70 * pow(x, 3) + 15 * x) / 8.0;
 	case 6:
 		return (231 * pow(x, 6) - 315 * pow(x, 4) + 105 * pow(x, 2) - 5) / 16.0;
-	case 7: 
+	case 7:
 		return (429 * pow(x, 7) - 693 * pow(x, 5) + 315 * pow(x, 3) - 35 * x) / 16.0;
 	case 8:
 		return (6435 * pow(x, 8) - 12012 * pow(x, 6) + 6930 * pow(x, 4) - 1260 * pow(x, 2) + 35) / 128.0;
@@ -33,3 +34,43 @@ double legendre(int degree, double x) {
 	}
 }
 
+
+
+void  make_spl(points_t *pts, spline_t *spl) {
+
+	matrix_t	*A, *BF;
+				A = BF = NULL;
+	double		*x = pts->x;
+	double		*y = pts->y;
+	double		a = x[0];
+	double		b = x[pts->n - 1];
+	int			m = pts->n - 2 > 10 ? 10 : pts->n - 2;
+	int			i, j, k;
+	char		*mEnv = getenv("APPROX_BASE_SIZE");
+
+	if (mEnv != NULL && atoi(mEnv) > 0)
+		m = atoi(mEnv);
+
+	A = make_martix(m + 1, m + 1);
+	for (i = 0; i < A->rn; i++)
+	{
+		for (j = 0; j < A->cn; j++)
+		{
+			put_entry_matrix(A, i, j, 0.0);
+			for (k = 0; k < pts->n; k++)
+			{
+				add_to_entry_matrix(A, i, j, legendre(i, x[k]) * legendre(j, x[k]);
+			}
+		}
+	}
+
+	BF = make_matrix(m + 1, 1);
+	for (i = 0; i < BF->rn; i++)
+	{
+		put_entry_matrix(BF, i, 0, 0.0);
+		for (k = 0; k < pts->n; k++)
+			add_to_entry_matrix(BF, i, 0, legendre(i, x[k]) * y[k]);
+	}
+
+
+}
