@@ -1,11 +1,11 @@
 //#include "aproksymator_legendre.c"
-#include "gaus\piv_ge_solver.h"
-#include "gaus\piv_ge_solver.c"
-#include "gaus\pivot.c"
-#include "gaus\matrix.h"
-#include "gaus\matrix.c"
+#include "gaus/piv_ge_solver.h"
+#include "gaus/piv_ge_solver.c"
+#include "gaus/pivot.c"
+#include "gaus/matrix.h"
+#include "gaus/matrix.c"
 #include <stdio.h>
-#include "gsl\matrix\gsl_matrix.h"
+#include "gsl/matrix/gsl_matrix.h"
 
 int main()
 {
