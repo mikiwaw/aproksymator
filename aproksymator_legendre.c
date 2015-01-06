@@ -34,12 +34,20 @@ double legendre(int degree, double x) {
 	}
 }
 
+void rows_swap(matrix_t *X, int a, int b)
+{
+	int i;
+	double tmp;
+	for (i = 0; i < X->cn; i++)
+	{
 
+	}
+}
 
 void  make_spl(points_t *pts, spline_t *spl) {
 
 	matrix_t	*A, *BF;
-				A = BF = NULL;
+	A = BF = NULL;
 	double		*x = pts->x;
 	double		*y = pts->y;
 	double		a = x[0];
