@@ -15,6 +15,7 @@ int main()
 {
 
 	int n = 2;
+	int s;
 	int i, j, v;
 	matrix_t *X;
 
