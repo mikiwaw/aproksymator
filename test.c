@@ -6,8 +6,8 @@
 #include "gaus/matrix.c"
 #include <stdio.h>
 #include "gsl/matrix/gsl_matrix.h"
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_cblas.h>
+#include "gsl/gsl_linalg.h"
+#include "gsl/gsl_cblas.h"
 
 
 
