@@ -51,8 +51,8 @@ double legendre(int degree, double x) {
 
 
 void  make_spl(points_t *pts, spline_t *spl) {
-
-	gsl_matrix *A, *A_invert; *BF;
+//nazwy
+	gsl_matrix *A, *A_inverse, *BF;
 	gsl_permutation * perm;
 
 	double		*x = pts->x;
@@ -89,5 +89,11 @@ void  make_spl(points_t *pts, spline_t *spl) {
 			gsl_matrix_set(BF, i, 0, legendre(i, x[k]) * y[k]);
 	}
 
+	gsl_linalg_LU_decomp(A, perm, &i);
+	gsl_linalg_LU_invert(A, perm, A_inverse);
 
+
+    gsl_matrix_fprintf(stdout, A, "%g");
+    gsl_matrix_fprintf(stdout, BF, "%g");
+    gsl_matrix_fprintf(stdout, A_inverse, "%g");
 }
