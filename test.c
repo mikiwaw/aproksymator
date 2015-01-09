@@ -1,47 +1,54 @@
-//#include "aproksymator_legendre.c"
+#include "aproksymator_legendre.c"
 //#include "gaus/piv_ge_solver.h"
 //#include "gaus/piv_ge_solver.c"
 //#include "gaus/pivot.c"
 //#include "gaus/matrix.h"
 //#include "gaus/matrix.c"
 #include <stdio.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_cblas.h>
+//#include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_linalg.h>
+//#include <gsl/gsl_cblas.h>
 
+#include "makespl.h"
 
 
 int main()
 {
+    points_t *pts;
+    spline_t *spl;
 
-	int n = 2;
-	int s;
-	int i, j, v;
-	//matrix_t *X = NULL;
-	int X;
-
-
-	gsl_matrix * m = gsl_matrix_alloc(n, n);
-	gsl_matrix * inverse = gsl_matrix_alloc(n, n);
-	gsl_permutation * perm = gsl_permutation_alloc(n);
-
-
-	for (i = 0; i < n; i++)
-		for (j = 0; j < n; j++)
-		{
-			printf("%dx%d: ", i, j);
-			scanf("%d", &v);
-			//put_entry_matrix(X, i, j, v);
-			gsl_matrix_set(m, i, j, v);
-		}
+    make_spl(pts, spl);
 
 
 
-	gsl_matrix_fprintf(stdout, m, "%f");
-	gsl_linalg_LU_decomp(m, perm, &s);
-    gsl_matrix_fprintf(stdout, inverse, "%f");
-	gsl_linalg_LU_invert(m, perm, inverse);
-	gsl_matrix_fprintf(stdout, inverse, "%f");
+//	int n = 2;
+//	int s;
+//	int i, j, v;
+//	//matrix_t *x = null;
+//	int x;
+//
+//
+//	gsl_matrix * m = gsl_matrix_alloc(n, n);
+//	gsl_matrix * inverse = gsl_matrix_alloc(n, n);
+//	gsl_permutation * perm = gsl_permutation_alloc(n);
+//
+//
+//	for (i = 0; i < n; i++)
+//		for (j = 0; j < n; j++)
+//		{
+//			printf("%dx%d: ", i, j);
+//			scanf("%d", &v);
+//			//put_entry_matrix(x, i, j, v);
+//			gsl_matrix_set(m, i, j, v);
+//		}
+//
+//
+//
+//	gsl_matrix_fprintf(stdout, m, "%f");
+//	gsl_linalg_lu_decomp(m, perm, &s);
+//    gsl_matrix_fprintf(stdout, inverse, "%f");
+//	gsl_linalg_lu_invert(m, perm, inverse);
+//	gsl_matrix_fprintf(stdout, inverse, "%f");
 
 	//	for (i = 0; i < X->rn; i++)
 	//		for (j = 0; j < X->cn; j++)
