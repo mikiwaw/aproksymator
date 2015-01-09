@@ -1,6 +1,8 @@
 #include "makespl.h"
 #include "math.h"
-#include "piv_ge_solver.h"
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_cblas.h>
 
 double legendre(int degree, double x) {
 	double tmp = (double)degree;
@@ -34,20 +36,25 @@ double legendre(int degree, double x) {
 	}
 }
 
-void rows_swap(matrix_t *X, int a, int b)
-{
-	int i;
-	double tmp;
-	for (i = 0; i < X->cn; i++)
-	{
+//void rows_swap(matrix_t *X, int a, int b)
+//{
+//	int i;
+//	double tmp;
+//	for (i = 0; i < X->cn; i++)
+//	{
+//
+//	}
+//}
 
-	}
-}
+//gsl_matrix * inverse = gsl_matrix_alloc(n, n);
+//gsl_permutation * perm = gsl_permutation_alloc(n);
+
 
 void  make_spl(points_t *pts, spline_t *spl) {
 
-	matrix_t	*A, *BF;
-	A = BF = NULL;
+	gsl_matrix *A, *A_invert; *BF;
+	gsl_permutation * perm;
+
 	double		*x = pts->x;
 	double		*y = pts->y;
 	double		a = x[0];
@@ -59,25 +66,27 @@ void  make_spl(points_t *pts, spline_t *spl) {
 	if (mEnv != NULL && atoi(mEnv) > 0)
 		m = atoi(mEnv);
 
-	A = make_martix(m + 1, m + 1);
-	for (i = 0; i < A->rn; i++)
+	m++;
+
+	A = gsl_matrix_alloc(m, m);
+
+	for (i = 0; i < m; i++)
 	{
-		for (j = 0; j < A->cn; j++)
+		for (j = 0; j < m; j++)
 		{
-			put_entry_matrix(A, i, j, 0.0);
 			for (k = 0; k < pts->n; k++)
 			{
-				add_to_entry_matrix(A, i, j, legendre(i, x[k]) * legendre(j, x[k]);
+				gsl_matrix_set(A, i, j, legendre(i, x[k]) * legendre(j, x[k]));
 			}
 		}
 	}
 
-	BF = make_matrix(m + 1, 1);
-	for (i = 0; i < BF->rn; i++)
+	BF = gsl_matrix_alloc(m, 1);
+
+	for (i = 0; i < m; i++)
 	{
-		put_entry_matrix(BF, i, 0, 0.0);
 		for (k = 0; k < pts->n; k++)
-			add_to_entry_matrix(BF, i, 0, legendre(i, x[k]) * y[k]);
+			gsl_matrix_set(BF, i, 0, legendre(i, x[k]) * y[k]);
 	}
 
 
