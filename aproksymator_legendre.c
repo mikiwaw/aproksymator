@@ -42,7 +42,6 @@ double legendre(int degree, double x)
     }
 }
 
-double ui()
 
 void  make_spl(points_t *pts, spline_t *spl)
 {
