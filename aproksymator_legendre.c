@@ -1,12 +1,16 @@
 #include "makespl.h"
-#include "math.h"
+#include <math.h>
+#include <float.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_blas.h>
+//#include <gsl/gsl_deriv.h>
 
-//test
-#include <stdio.h>
+////test
+//#include <stdio.h>
+
+//#define h 1.0e-6
 
 double legendre(int degree, double x)
 {
@@ -38,9 +42,102 @@ double legendre(int degree, double x)
     case 11:
         return (88179 * pow(x, 11) - 230945 * pow(x, 9) + 218790 * pow(x, 7) - 90090 * pow(x, 5) + 15015 * pow(x, 3) - 693 * x) / 256.0;
     default:
-        return (2.0 * tmp + 1.0) / (tmp + 1.0) * x * legendre(degree - 1, x) - tmp / (tmp + 1) * legendre(degree - 2, x);
+        return (2.0 * (tmp - 1) + 1.0) / tmp * x * legendre(degree - 1, x) - (tmp - 1.0) / tmp * legendre(degree - 2, x);
     }
 }
+
+//struct legendre_wrap_params
+//{
+//    int degree;
+//};
+//
+//double legendre_wrap(double x, void *p)
+//{
+//    struct legendre_wrap_params * params
+//     = (struct legendre_wrap_params *)p;
+//     return legendre(p->degree, x);
+//}
+
+double fi(const gsl_matrix *a, const int m, const double x)
+{
+    int i;
+    double result = 0.0;
+    for (i = 0; i < m; i++)
+    {
+        result += gsl_matrix_get(a, i, 0) * legendre(i, x);
+    }
+    return result;
+}
+
+double d1fi(const gsl_matrix *a, const int m, const double x)
+{
+    int i;
+    double tmp, result = 0.0;
+    for (i = 1; i < m; i++)
+    {
+        tmp = (double)i;
+        result += gsl_matrix_get(a, i, 0) * (tmp / (pow(x, 2) - 1.0) * (x * legendre(i, x) - legendre(i - 1, x)));
+    }
+    return result;
+}
+
+double d2fi(const gsl_matrix *a, const int m, const double x)
+{
+    int i;
+    double tmp, result = 0.0;
+    for (i = 1; i < m; i++)
+    {
+        tmp = (double)i;
+        result += gsl_matrix_get(a, i, 0) * (tmp / pow((pow(x, 2) - 1.0), 2) * (2.0 * x * legendre(i - 1, x) + ((tmp - 1.0) * pow(x, 2) - tmp - 1.0) * legendre(i, x)));
+    }
+    return result;
+}
+
+double d3fi(const gsl_matrix *a, const int m, const double x)
+{
+    int i;
+    double tmp, result = 0.0;
+    for (i = 1; i < m; i++)
+    {
+        tmp = (double)i;
+        result += gsl_matrix_get(a, i, 0) * (-1.0 * sqrt(pow(1.0 - pow(x, 2), 2))* pow(legendre(i, x), 3));
+    }
+    return result;
+}
+
+//double d1fi(const gsl_matrix *a, const int m, const double x)
+//{
+//    int i;
+//    double tmp, abserr, result = 0.0;
+//    struct legendre_wrap_params params;
+//    gsl_function F;
+//    F.function = &legendre_wrap;
+//    F.params =  &params
+//    for (i = 0; i < m; i++)
+//    {
+//        parms->degree = i;
+//        gsl_deriv_central(&F, x, 1e-8, &tmp, &abserr);
+//        result += gsl_matrix_get(a, i, 0) * tmp;
+//    }
+//    return result;
+//}
+
+
+//double d1fi(const gsl_matrix *a, const int m, const double x)
+//{
+//    return (fi(a, m, x - 2.0 * h) - fi(a, m, x + 2.0 * h) - 8.0 * fi(a, m, x - h) + 8.0 * fi(a, m, x + h)) / (12.0 * h);
+//}
+//
+//double d2fi(const gsl_matrix *a, const int m, const double x)
+//{
+//    return (-fi(a, m, x - 2.0 * h) - fi(a, m, x + 2.0 * h) + 16.0 * fi(a, m, x - h) + 16.0 * fi(a, m, x + h) - 30.0 * fi(a, m, x)) / (12.0 * h * h);
+//}
+//
+//double d3fi(const gsl_matrix *a, const int m, const double x)
+//{
+//    return (- fi(a, m, x - 2.0 * h) + fi(a, m, x + 2.0 * h) + 2.0 * fi(a, m, x - h) - 2.0 * fi(a, m, x + h)) / (2.0 * h * h * h);
+//}
+
 
 
 void  make_spl(points_t *pts, spline_t *spl)
@@ -61,7 +158,7 @@ void  make_spl(points_t *pts, spline_t *spl)
         m = atoi(mEnv);
 
     m++;
-    printf("\n\n%d\n\n", m);
+//    printf("\n\n%d\n\n", m);
 
     A = gsl_matrix_alloc(m, m);
     A_inverse = gsl_matrix_alloc(m, m);
@@ -103,7 +200,7 @@ void  make_spl(points_t *pts, spline_t *spl)
     gsl_matrix_free(A_inverse);
     gsl_matrix_free(BF);
 
-    gsl_matrix_fprintf(stdout, wsp, "%g");
+//    gsl_matrix_fprintf(stdout, wsp, "%g");
 
     if (alloc_spl(spl, m) == 0)
     {
@@ -111,18 +208,10 @@ void  make_spl(points_t *pts, spline_t *spl)
         {
             double xx = spl->x[i] = a + i*(b - a) / (spl->n - 1);
             xx += 10.0*DBL_EPSILON;  // zabezpieczenie przed ulokowaniem punktu w poprzednim przedziale
-            spl->f[i] = 0;
-            spl->f1[i] = 0;
-            spl->f2[i] = 0;
-            spl->f3[i] = 0;
-            for (k = 0; k < m; k++)
-            {
-                double ck = gsl_matrix_get (a, k, 0);
-                spl->f[i] += ck * fi(a, b, nb, k, xx);
-                spl->f1[i] += ck * dfi(a, b, nb, k, xx);
-                spl->f2[i] += ck * d2fi(a, b, nb, k, xx);
-                spl->f3[i] += ck * d3fi(a, b, nb, k, xx);
-            }
+            spl->f[i] = fi(wsp, m, xx);
+            spl->f1[i] = d1fi(wsp, m, xx);
+            spl->f2[i] = d2fi(wsp, m, xx);
+            spl->f3[i] = d3fi(wsp, m, xx);
         }
     }
 
