@@ -7,16 +7,19 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_deriv.h>
 
-#define h 1.0e+6
+#include <stdio.h>
+#include <stdlib.h>
+
+#define h 1.0
 
 ////test
 //#include <stdio.h>
 
 
 
-double legendre(int degree, double x)
+double legendre(int degree, long double x)
 {
-    double tmp = (double)degree;
+    double tmp = (long double)degree;
     switch (degree)
     {
     case 0:
@@ -53,7 +56,7 @@ struct legendre_wrap_params
     int degree;
 };
 
-double legendre_wrap(double x, void *p)
+double legendre_wrap(long double x, void *p)
 {
     struct legendre_wrap_params * params = (struct legendre_wrap_params *)p;
     return legendre(params->degree, x);
@@ -69,7 +72,7 @@ double d1legendre(double x, void *p)
     F.function = &legendre_wrap;
     F.params = params;
 
-    gsl_deriv_central(&F, x, h, &result, &tmp);
+    gsl_deriv_forward(&F, x, h, &result, &tmp);
 
     return result;
 }
@@ -84,7 +87,7 @@ double d2legendre(double x, void *p)
     F.function = &d1legendre;
     F.params = params;
 
-    gsl_deriv_central(&F, x, h, &result, &tmp);
+    gsl_deriv_forward(&F, x, h, &result, &tmp);
 
     return result;
 
@@ -100,7 +103,7 @@ double d3legendre(double x, void *p)
     F.function = &d2legendre;
     F.params = params;
 
-    gsl_deriv_central(&F, x, h, &result, &tmp);
+    gsl_deriv_forward(&F, x, h, &result, &tmp);
 
     return result;
 
@@ -167,7 +170,7 @@ double d3fi(const gsl_matrix *a, const int m, const double x)
 
 void  make_spl(points_t *pts, spline_t *spl)
 {
-//nazwy
+
     gsl_matrix *A, *A_inverse, *BF, *wsp;
     gsl_permutation * perm;
 
@@ -176,6 +179,8 @@ void  make_spl(points_t *pts, spline_t *spl)
     double		a = x[0];
     double		b = x[pts->n - 1];
     int			m = pts->n - 1 > 10 ? 10 : pts->n - 1;
+
+
     int			i, j, k;
     char		*mEnv = getenv("APPROX_BASE_SIZE");
 
@@ -214,7 +219,7 @@ void  make_spl(points_t *pts, spline_t *spl)
         for (k = 0; k < pts->n; k++)
             BF->data[i * BF->tda + 0] += legendre(i, x[k]) * y[k];
     }
-
+//mnozenie macierzy
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A_inverse, BF, 0.0, wsp);
     gsl_matrix_free(A_inverse);
     gsl_matrix_free(BF);
@@ -229,8 +234,28 @@ void  make_spl(points_t *pts, spline_t *spl)
             spl->f1[i] = d1fi(wsp, m, xx);
             spl->f2[i] = d2fi(wsp, m, xx);
             spl->f3[i] = d3fi(wsp, m, xx);
+
+            //spl->f1[i] = 0;
+            //spl->f2[i] = 0;
+            //spl->f3[i] = 0;
+
         }
     }
+
+
+    int nn;
+    double aa, bb, step;
+    aa = 1.0;
+    bb = 30.0;
+    nn = 200;
+    step = (bb - aa) / (double)nn;
+    FILE *out = fopen ( "czystedane", "w");
+    for (i = 0; i <= nn; i++)
+    {
+        fprintf(out, "%f %f\n", aa, fi(wsp, m, aa));
+        aa += step;
+    }
+
 
     return;
 }
