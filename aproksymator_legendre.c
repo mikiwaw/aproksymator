@@ -7,19 +7,15 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_deriv.h>
 
-#include <stdio.h>
-#include <stdlib.h>
 
 #define h 1.0
 
-////test
-//#include <stdio.h>
 
 
 
-double legendre(int degree, long double x)
+double legendre(int degree, double x)
 {
-    double tmp = (long double)degree;
+    double tmp = (double)degree;
     switch (degree)
     {
     case 0:
@@ -56,7 +52,7 @@ struct legendre_wrap_params
     int degree;
 };
 
-double legendre_wrap(long double x, void *p)
+double legendre_wrap(double x, void *p)
 {
     struct legendre_wrap_params * params = (struct legendre_wrap_params *)p;
     return legendre(params->degree, x);
@@ -224,38 +220,18 @@ void  make_spl(points_t *pts, spline_t *spl)
     gsl_matrix_free(A_inverse);
     gsl_matrix_free(BF);
 
-  if (alloc_spl(spl, m) == 0)
+    if (alloc_spl(spl, m) == 0)
     {
         for (i = 0; i < spl->n; i++)
         {
             double xx = spl->x[i] = a + i*(b - a) / (spl->n - 1);
-            xx += 10.0*DBL_EPSILON;  // zabezpieczenie przed ulokowaniem punktu w poprzednim przedziale
+            xx += 10.0*DBL_EPSILON;
             spl->f[i] = fi(wsp, m, xx);
             spl->f1[i] = d1fi(wsp, m, xx);
             spl->f2[i] = d2fi(wsp, m, xx);
             spl->f3[i] = d3fi(wsp, m, xx);
-
-            //spl->f1[i] = 0;
-            //spl->f2[i] = 0;
-            //spl->f3[i] = 0;
-
         }
     }
-
-
-    int nn;
-    double aa, bb, step;
-    aa = 1.0;
-    bb = 30.0;
-    nn = 200;
-    step = (bb - aa) / (double)nn;
-    FILE *out = fopen ( "czystedane", "w");
-    for (i = 0; i <= nn; i++)
-    {
-        fprintf(out, "%f %f\n", aa, fi(wsp, m, aa));
-        aa += step;
-    }
-
 
     return;
 }
