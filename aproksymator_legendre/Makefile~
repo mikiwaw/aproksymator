@@ -1,0 +1,12 @@
+objects = main.o aproksymator_legendre.o coefficients.o points.o 
+
+legendre: $(objects)
+	$(CC) -o legendre $(objects) -lgsl -lgslcblas -lm
+
+main.o : coefficients.h points.h
+aproksymator_legendre.o :
+
+.PHONY: clean
+
+clean:
+	-rm *.o legendre

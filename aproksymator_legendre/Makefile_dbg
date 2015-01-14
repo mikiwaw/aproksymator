@@ -1,0 +1,18 @@
+objects = main.o aproksymator_legendre.o coefficients.o points.o 
+
+legendre: $(objects)
+	$(CC) -g -o0 -o legendre $(objects) -lgsl -lgslcblas -lm
+
+main.o : makecof.h
+	$(CC) -c -g -o0 -o main.o main.c
+aproksymator_legendre.o : makecof.h
+	$(CC) -c -g -o0 -o aproksymator_legendre.o aproksymator_legendre.c
+points.o :
+	$(CC) -c -g -o0 -o points.o points.c
+coefficients.o :
+	$(CC) -c -g -o0 -o coefficients.o coefficients.c
+
+.PHONY: clean
+
+clean:
+	-rm *.o legendre
